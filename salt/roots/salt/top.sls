@@ -1,3 +1,5 @@
 base:
   '*':
-    - nginx
+    - git
+    - pip
+    - requirements
