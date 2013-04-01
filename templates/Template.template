@@ -1,0 +1,11 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "AWS CloudFormation Template Template: Sample template showing the template structure and sections. This template does not create any billable AWS Resources.",
+    "Parameters": {},
+    "Resources": {
+        "sampleWaitHandle": {
+            "Type": "AWS::CloudFormation::WaitConditionHandle"
+        }
+    },
+    "Outputs": {}
+}
