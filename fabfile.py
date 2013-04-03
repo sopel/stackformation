@@ -113,4 +113,4 @@ def download_aws_samples():
     """
     Download the AWS CloudFormation sample templates.
     """
-    local(os.path.abspath(os.path.join('.', 'scripts', 'download-aws-cloudformation-samples.py')))
+    local('python ' + os.path.abspath(os.path.join('.', 'scripts', 'download-aws-cloudformation-samples.py')))
