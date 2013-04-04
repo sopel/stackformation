@@ -1,3 +1,4 @@
-boto>=2.8.0
-nose>=1.2.1
+boto==2.8.0
+nose==1.2.1
+pylint==0.27.0
 -e git+https://github.com/sopel/botocross.git@1.1.0#egg=botocross

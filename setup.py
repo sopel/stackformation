@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from distutils.core import setup
 from setuptools import find_packages
+import stackformation
 import sys
 
 if sys.version_info <= (2, 5):

@@ -16,9 +16,12 @@ import logging
 import os.path
 
 __version__ = '0.1.0'
-templates_dir = os.path.abspath(os.path.join('.', 'templates'))
+TEMPLATES_DIR = os.path.abspath(os.path.join('.', 'templates'))
 
+# REVIEW: How is the global log variaable handled elsewhere usually?
+# pylint: disable=C0103
 log = logging.getLogger('stackformation')
+# pylint: enable=C0103
 bc.configure_logging(log, 'INFO')
 
 # TODO: this modules entire functionality should be migrated upstream to botocross,
@@ -47,11 +50,11 @@ def create_buckets(bucket_base_name):
     """
 
     def create_bucket(s3, bucket_name, location):
-            """
-            Create S3 bucket.
-            """
-            log.info("Creating bucket {0} ...".format(bucket_name))
-            s3.create_bucket(bucket_name, location=location)
+        """
+        Create S3 bucket.
+        """
+        log.info("Creating bucket {0} ...".format(bucket_name))
+        s3.create_bucket(bucket_name, location=location)
 
     loop_locations(create_bucket, bucket_base_name)
 
@@ -60,55 +63,56 @@ def validate_buckets(bucket_base_name):
     Validate that S3 buckets exist.
     """
 
+    # pylint: disable=W0613
     def validate_bucket(s3, bucket_name, location=None):
-            """
-            Validate that required S3 buckets exist.
-            """
-            log.info("Validating bucket {0} ...".format(bucket_name))
-            if None is s3.lookup(bucket_name):
-                log.warn("... bucket {0} does not exist!".format(bucket_name))
-            else:
-                log.info("... bucket {0} is available.".format(bucket_name))
+        """
+        Validate that required S3 buckets exist.
+        """
+        log.info("Validating bucket {0} ...".format(bucket_name))
+        if None is s3.lookup(bucket_name):
+            log.warn("... bucket {0} does not exist!".format(bucket_name))
+        else:
+            log.info("... bucket {0} is available.".format(bucket_name))
 
     loop_locations(validate_bucket, bucket_base_name)
 
-def list_templates(templates_dir=	templates_dir):
+def list_templates(templates_dir=TEMPLATES_DIR):
     """
     List available templates.
     """
 
     for dirpath, dirnames, filenames in os.walk(templates_dir):
-	# list only *.template files
-	for filename in filenames:
-	    if not filename.endswith('.template'):
-		filenames.remove(filename)
+        # list only *.template files
+        for filename in filenames:
+            if not filename.endswith('.template'):
+                filenames.remove(filename)
 
-	log.info("There are {0} templates within {1} ...".format(len(filenames), dirpath))
-	for filename in filenames:
-	    name = os.path.relpath(os.path.join(dirpath, filename)).replace('\\', '/')
-	    log.info("... {0} ...".format(name))
-	    
-def upload_templates(bucket_base_name, templates_dir=templates_dir):
+    log.info("There are {0} templates within {1} ...".format(len(filenames), dirpath))
+    for filename in filenames:
+        name = os.path.relpath(os.path.join(dirpath, filename)).replace('\\', '/')
+        log.info("... {0} ...".format(name))
+
+def upload_templates(bucket_base_name, templates_dir=TEMPLATES_DIR):
     """
     Upload templates to existing S3 buckets.
     """
 
     def upload_template(s3, bucket_name, location=None):
-            """
-            Upload template to existing S3 buckets.
-            """
-            bucket = s3.get_bucket(bucket_name)
-            key = boto.s3.key.Key(bucket)
-            for dirpath, dirnames, filenames in os.walk(templates_dir):
-                # upload only *.template files
-                for filename in filenames:
-                    if not filename.endswith('.template'):
-                        filenames.remove(filename)
+        """
+        Upload template to existing S3 buckets.
+        """
+        bucket = s3.get_bucket(bucket_name)
+        key = boto.s3.key.Key(bucket)
+        for dirpath, dirnames, filenames in os.walk(templates_dir):
+            # upload only *.template files
+            for filename in filenames:
+                if not filename.endswith('.template'):
+                    filenames.remove(filename)
 
-                log.info("Uploading {0} templates from {1} to {2} ...".format(len(filenames), dirpath, bucket_name))
-                for filename in filenames:
-                    key.name = os.path.relpath(os.path.join(dirpath, filename)).replace('\\', '/')
-                    log.debug("... uploading {0} ...".format(key.name))
-                    key.set_contents_from_filename(os.path.join(dirpath, filename))
+            log.info("Uploading {0} templates from {1} to {2} ...".format(len(filenames), dirpath, bucket_name))
+            for filename in filenames:
+                key.name = os.path.relpath(os.path.join(dirpath, filename)).replace('\\', '/')
+                log.debug("... uploading {0} ...".format(key.name))
+                key.set_contents_from_filename(os.path.join(dirpath, filename))
 
     loop_locations(upload_template, bucket_base_name)

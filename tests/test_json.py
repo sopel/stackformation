@@ -12,16 +12,20 @@
 # language governing permissions and limitations under the License.
 import json
 import os
-import tests
 import stackformation as sfn
 import unittest
 
 class TestJSON(unittest.TestCase):
-
+    """
+    Test templates conforming to JSON (no schema support yet).
+    """
     # REVIEW: this test fails at the first validation error, likely it would be nicer
     # to run each file as a separate test case?
     def test_validate(self):
-        for dirpath, dirnames, filenames in os.walk(sfn.templates_dir):
+        """
+        Test templates validate as JSON.
+        """
+        for dirpath, dirnames, filenames in os.walk(sfn.TEMPLATES_DIR):
             # validate only *.template files
             for filename in filenames:
                 if not filename.endswith('.template'):
@@ -29,14 +33,12 @@ class TestJSON(unittest.TestCase):
 
             print "\nValidating ", len(filenames), " templates in ", dirpath, " ..."
             for filename in filenames:
-                file = open(os.path.join(dirpath, filename), 'r')
                 try:
-                    json.load(file)
+                    with open(os.path.join(dirpath, filename), 'r') as template:
+                        json.load(template)
                 except:
                     print "Template '", filename, "' does not validate as JSON:"
                     raise
-                finally:
-                    file.close()
 
 if __name__ == "__main__":
     unittest.main()

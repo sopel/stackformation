@@ -59,10 +59,9 @@ def validate_body():
     """
     Validate templates via body upload.
     """
-    regions = boto.cloudformation.regions()
     try:
         cfn = boto.connect_cloudformation()
-        for dirpath, dirnames, filenames in os.walk(sfn.templates_dir):
+        for dirpath, dirnames, filenames in os.walk(sfn.TEMPLATES_DIR):
             # upload only *.template files
             for filename in filenames:
                 if not filename.endswith('.template'):
@@ -70,11 +69,11 @@ def validate_body():
 
             print "Validating ", len(filenames), "templates from ", dirpath, " ..."
             for filename in filenames:
-                file = open(os.path.join(dirpath, filename), 'r')
                 try:
-                    template = cfn.validate_template(template_body=file.read())
-                finally:
-                    file.close()
+                    with open(os.path.join(dirpath, filename), 'r') as template:
+                        response = cfn.validate_template(template_body=template.read())
+                except:
+                    pass
     except boto.exception.BotoServerError, e:
         log.error(e.error_message)
 
@@ -88,7 +87,7 @@ def validate_url(bucket_base_name):
         bucket_name = bucket_base_name + '-' + region.name
         try:
             cfn = boto.connect_cloudformation(region=region)
-            for dirpath, dirnames, filenames in os.walk(sfn.templates_dir):
+            for dirpath, dirnames, filenames in os.walk(sfn.TEMPLATES_DIR):
                 # upload only *.template files
                 for filename in filenames:
                     if not filename.endswith('.template'):
