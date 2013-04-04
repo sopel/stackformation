@@ -10,3 +10,10 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
+import sys
+
+# Use backported unittest version unittest2 for Python 2.6.
+if sys.version_info[:2] == (2, 6):
+    import unittest2 as unittest
+else:
+    import unittest

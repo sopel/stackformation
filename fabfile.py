@@ -17,11 +17,32 @@ bc.configure_logging(log, 'INFO')
 @task(default=True)
 def test(args=None):
     """
-    Run all unit tests and doctests.
+    Run all tests.
 
     Specify string argument ``args`` for additional args to ``nosetests``.
     """
-    default_args = "-sv --with-doctest --nologcapture"
+    test_unit(args)
+    test_integration(args)
+
+@task
+def test_integration(args=None):
+    """
+    Run all integration tests.
+
+    Specify string argument ``args`` for additional args to ``nosetests``.
+    """
+    default_args = "--nocapture --verbose --nologcapture tests/integration"
+    default_args += (" " + args) if args else ""
+    nose.core.run(argv=[''] + default_args.split())
+
+@task
+def test_unit(args=None):
+    """
+    Run all unit tests.
+
+    Specify string argument ``args`` for additional args to ``nosetests``.
+    """
+    default_args = "--nocapture --verbose --nologcapture tests/unit"
     default_args += (" " + args) if args else ""
     nose.core.run(argv=[''] + default_args.split())
 
