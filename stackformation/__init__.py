@@ -31,8 +31,6 @@ def loop_locations(fn, bucket_base_name):
     Loop over all S3 locations and execute function fn.
     """
     from botocross.s3 import RegionMap, class_iterator
-    # KLULDGE: botocross 1.1.0 lacks ap-southeast-2 region still ...
-    RegionMap['APSoutheast2'] = 'ap-southeast-2'
     
     s3 = boto.connect_s3()
     locations = class_iterator(boto.s3.connection.Location)
