@@ -2,6 +2,12 @@
 
  A collection of community templates for [AWS CloudFormation](http://aws.amazon.com/cloudformation/).
 
+## Status
+
+Very early stages, not much to see/use; especially this is about tooling only so far, i.e. there are no templates migrated here yet. You can play with the tooling by means of the 
+[download-aws-cloudformation-samples.py](https://github.com/sopel/stackformation/blob/master/scripts/download-aws-cloudformation-samples.py](d) helper script.
+
+[![Build Status](http://ci.labs.cityindex.com:8080/job/stackformation/badge/icon)](http://ci.labs.cityindex.com:8080/job/stackformation/)
 
 ## Overview
 
