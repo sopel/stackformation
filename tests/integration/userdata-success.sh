@@ -5,7 +5,7 @@
 
 # BEGIN: insert custom code below this line, return non zero exit code on failure
 
-# return an epic failure
+# return a sounding success
 return 0
 
 # END: insert custom code above this line
