@@ -17,7 +17,7 @@ setup(name="stackformation",
       platforms="Posix; MacOS X; Windows",
       install_requires=[
         "boto >= 2.6.0",
-        "botocross >= 1.1.0",
+        "botocross >= 1.1.1",
       ],
       classifiers=[
           "Development Status :: 3 - Alpha",
