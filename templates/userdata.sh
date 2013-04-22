@@ -5,6 +5,6 @@
 
 # BEGIN: insert custom code below this line, return non zero exit code on failure
 
-return $?
+return 0
 
 # END: insert custom code above this line

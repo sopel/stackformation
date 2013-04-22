@@ -3,6 +3,6 @@
 
 # BEGIN: insert custom code below this line, return non zero exit code on failure
 
-exit $?
+exit 0
 
 # END: insert custom code above this line
