@@ -84,9 +84,7 @@ def validate_body():
         cfn = boto.connect_cloudformation()
         for dirpath, dirnames, filenames in os.walk(sfn.TEMPLATES_DIR):
             # upload only *.template files
-            for filename in filenames:
-                if not filename.endswith('.template'):
-                    filenames.remove(filename)
+            filenames = [ filename for filename in filenames if filename.endswith('.template') ]
 
             print "Validating ", len(filenames), "templates from ", dirpath, " ..."
             for filename in filenames:
@@ -110,9 +108,7 @@ def validate_url(bucket_base_name):
             cfn = boto.connect_cloudformation(region=region)
             for dirpath, dirnames, filenames in os.walk(sfn.TEMPLATES_DIR):
                 # upload only *.template files
-                for filename in filenames:
-                    if not filename.endswith('.template'):
-                        filenames.remove(filename)
+                filenames = [ filename for filename in filenames if filename.endswith('.template') ]
 
                 print "Validating ", len(filenames), "templates in ", bucket_name, " ..."
                 for filename in filenames:

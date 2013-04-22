@@ -81,9 +81,7 @@ def list_templates(templates_dir=TEMPLATES_DIR):
 
     for dirpath, dirnames, filenames in os.walk(templates_dir):
         # list only *.template files
-        for filename in filenames:
-            if not filename.endswith('.template'):
-                filenames.remove(filename)
+        filenames = [ filename for filename in filenames if filename.endswith('.template') ]
 
     log.info("There are {0} templates within {1} ...".format(len(filenames), dirpath))
     for filename in filenames:
@@ -103,9 +101,7 @@ def upload_templates(bucket_base_name, templates_dir=TEMPLATES_DIR):
         key = boto.s3.key.Key(bucket)
         for dirpath, dirnames, filenames in os.walk(templates_dir):
             # upload only *.template files
-            for filename in filenames:
-                if not filename.endswith('.template'):
-                    filenames.remove(filename)
+            filenames = [ filename for filename in filenames if filename.endswith('.template') ]
 
             log.info("Uploading {0} templates from {1} to {2} ...".format(len(filenames), dirpath, bucket_name))
             for filename in filenames:

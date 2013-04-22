@@ -29,9 +29,7 @@ class TestCloudFormation(unittest.TestCase):
         cfn = boto.connect_cloudformation()
         for dirpath, dirnames, filenames in os.walk(sfn.TEMPLATES_DIR):
             # validate only *.template files
-            for filename in filenames:
-                if not filename.endswith('.template'):
-                    filenames.remove(filename)
+            filenames = [ filename for filename in filenames if filename.endswith('.template') ]
 
             print "\nValidating ", len(filenames), " templates in ", dirpath, " ..."
             for filename in filenames:
