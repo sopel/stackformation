@@ -4,7 +4,12 @@
 
 ## Status
 
-Very early stages, not much to see/use; especially this is about tooling only so far, i.e. there are no templates migrated here yet. You can play with the tooling by means of the 
+Very early stages, not much to see/use; especially this is mostly about tooling so far, i.e. there are no internal 
+[templates](https://github.com/sopel/stackformation/tree/master/templates) migrated here yet - available already are:
+
+* [New Relic Cloudwatch Plugin (spot)](https://github.com/sopel/stackformation/blob/master/templates/newrelic-cloudwatch-plugin-spot.md)
+
+Also, you can play with the tooling by means of the 
 [download-aws-cloudformation-samples.py](https://github.com/sopel/stackformation/blob/master/scripts/download-aws-cloudformation-samples.py](d) helper script.
 
 [![Build Status](http://ci.labs.cityindex.com:8080/job/stackformation/badge/icon)](http://ci.labs.cityindex.com:8080/job/stackformation/)

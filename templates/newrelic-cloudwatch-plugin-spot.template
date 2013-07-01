@@ -1,0 +1,314 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Starts a single New Relic Cloudwatch Plugin spot instance via Auto Scaling from an upstream maintained EBS AMI.",
+    "Parameters": {
+        "AccountNumber": {
+            "Type": "String",
+            "Description": "AWS account number to build region specific ARN for Auto Scaling notifications."
+        },
+        "AutoScalingTopic": {
+            "Type": "String",
+            "Description": "SNS topic to build region specific ARN for Auto Scaling notifications."
+        },
+        "InstanceProfile": {
+            "Type": "String",
+            "Description": "IAM instance profile to use within the Auto Scaling group."
+        },
+        "InstanceType": {
+            "Description": "EC2 instance type",
+            "Type": "String",
+            "Default": "t1.micro",
+            "AllowedValues": [
+                "t1.micro",
+                "m1.small",
+                "m1.medium",
+                "c1.medium"
+            ],
+            "ConstraintDescription": "must be a valid (and allowed) EC2 instance type."
+        },
+        "KeyName": {
+            "Description": "Name of an existing EC2 key pair to enable remote access.",
+            "Type": "String"
+        },
+        "NewRelicLicenseKey": {
+            "Description": "New Relic account license key.",
+            "Type": "String"
+        },
+        "RemoteAccessCidrIp": {
+            "Description": "CIDR range to allow remote access from (default: localhost, i.e. none).",
+            "Type": "String",
+            "Default": "127.0.0.1/32"
+        },
+        "SpotPrice": {
+            "Type": "Number",
+            "Description": "Spot price for instances to start within the Auto Scaling group.",
+            "Default": "0.012"
+        }
+    },
+    "Mappings": {
+        "RegionMap": {
+            "us-east-1": {
+                "AMI": "ami-cf0979a6"
+            },
+            "us-west-1": {
+                "AMI": "ami-0c381149"
+            },
+            "us-west-2": {
+                "AMI": "ami-3b4ada0b"
+            },
+            "eu-west-1": {
+                "AMI": "ami-79ccde0d"
+            },
+            "ap-southeast-1": {
+                "AMI": "ami-541a5306"
+            },
+            "ap-southeast-2": {
+                "AMI": "ami-a342d199"
+            },
+            "ap-northeast-1": {
+                "AMI": "ami-c54dc7c4"
+            },
+            "sa-east-1": {
+                "AMI": "ami-c86bced5"
+            }
+        }
+    },
+    "Resources": {
+        "IAMUser": {
+            "Type": "AWS::IAM::User",
+            "Properties": {
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "CloudFormation",
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "autoscaling:Describe*",
+                                        "cloudformation:DescribeStacks",
+                                        "cloudformation:DescribeStackEvents",
+                                        "cloudformation:DescribeStackResources",
+                                        "cloudformation:GetTemplate",
+                                        "cloudfront:Get*",
+                                        "cloudfront:List*",
+                                        "cloudwatch:Describe*",
+                                        "cloudwatch:Get*",
+                                        "cloudwatch:List*",
+                                        "dynamodb:DescribeTable",
+                                        "dynamodb:ListTables",
+                                        "ec2:Describe*",
+                                        "elasticache:Describe*",
+                                        "elasticbeanstalk:Check*",
+                                        "elasticbeanstalk:Describe*",
+                                        "elasticbeanstalk:List*",
+                                        "elasticbeanstalk:RequestEnvironmentInfo",
+                                        "elasticbeanstalk:RetrieveEnvironmentInfo",
+                                        "elasticloadbalancing:Describe*",
+                                        "route53:Get*",
+                                        "route53:List*",
+                                        "redshift:Describe*",
+                                        "rds:Describe*",
+                                        "rds:ListTagsForResource",
+                                        "s3:Get*",
+                                        "s3:List*",
+                                        "sdb:GetAttributes",
+                                        "sdb:List*",
+                                        "ses:Get*",
+                                        "ses:List*",
+                                        "sns:Get*",
+                                        "sns:List*",
+                                        "sqs:GetQueueAttributes",
+                                        "sqs:ListQueues",
+                                        "sqs:ReceiveMessage"
+                                    ],
+                                    "Resource": "*"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "IAMUserAccessKey": {
+            "Type": "AWS::IAM::AccessKey",
+            "Properties": {
+                "UserName": {
+                    "Ref": "IAMUser"
+                }
+            }
+        },
+        "InstanceSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Remote Access Security Group",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "icmp",
+                        "FromPort": "3",
+                        "ToPort": "4",
+                        "CidrIp": "0.0.0.0/0"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCidrIp"
+                        }
+                    }
+                ]
+            }
+        },
+        "InstanceLaunchConfiguration": {
+            "Type": "AWS::AutoScaling::LaunchConfiguration",
+            "Properties": {
+                "IamInstanceProfile": {
+                    "Ref": "InstanceProfile"
+                },
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "RegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "AMI"
+                    ]
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "InstanceSecurityGroup"
+                    }
+                ],
+                "SpotPrice": {
+                    "Ref": "SpotPrice"
+                },
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "# Please make sure to update the license_key information with the\n",
+                                "# license key for your New Relic account.\n",
+                                "#\n",
+                                "newrelic:\n",
+                                "  #\n",
+                                "  # Update with your New Relic account license key:\n",
+                                "  #\n",
+                                "  license_key: '",
+                                {
+                                    "Ref": "NewRelicLicenseKey"
+                                },
+                                "'\n",
+                                "  #\n",
+                                "  # Set to '1' for verbose output, remove for normal output.\n",
+                                "  # All output goes to stdout/stderr.\n",
+                                "  #\n",
+                                "  # verbose: 1\n",
+                                "#\n",
+                                "# AWS configuration.\n",
+                                "#\n",
+                                "aws:\n",
+                                "  # Update with you AWS account keys:\n",
+                                "  access_key: '",
+                                {
+                                    "Ref": "IAMUserAccessKey"
+                                },
+                                "'\n",
+                                "  secret_key: '",
+                                {
+                                    "Fn::GetAtt": [
+                                        "IAMUserAccessKey",
+                                        "SecretAccessKey"
+                                    ]
+                                },
+                                "'\n",
+                                "#\n",
+                                "# Agent configuration.\n",
+                                "#\n",
+                                "agents:\n",
+                                "  #\n",
+                                "  # Uncomment an agent to enable it. Set 'overview' to true to\n",
+                                "  # enable its overview plugin (eg. EC2 Overview), displaying all\n",
+                                "  # metrics on a single dashboard (currently only available for EC2 & EBS).\n",
+                                "  #\n",
+                                "  ec2:\n",
+                                "    overview: true\n",
+                                "  ebs:\n",
+                                "    overview: true\n",
+                                "  elb:\n",
+                                "    overview: false\n",
+                                "  rds:\n",
+                                "    overview: false\n",
+                                "  sqs:\n",
+                                "    overview: false\n",
+                                "  sns:\n",
+                                "    overview: false\n",
+                                "  ec:\n",
+                                "    overview: false\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "InstanceAutoScalingGroup": {
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "Properties": {
+                "AvailabilityZones": {
+                    "Fn::GetAZs": ""
+                },
+                "LaunchConfigurationName": {
+                    "Ref": "InstanceLaunchConfiguration"
+                },
+                "MinSize": "1",
+                "DesiredCapacity": "1",
+                "MaxSize": "1",
+                "NotificationConfiguration": {
+                    "TopicARN": {
+                        "Fn::Join": [
+                            ":",
+                            [
+                                "arn",
+                                "aws",
+                                "sns",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                {
+                                    "Ref": "AccountNumber"
+                                },
+                                {
+                                    "Ref": "AutoScalingTopic"
+                                }
+                            ]
+                        ]
+                    },
+                    "NotificationTypes": [
+                        "autoscaling:EC2_INSTANCE_LAUNCH",
+                        "autoscaling:EC2_INSTANCE_LAUNCH_ERROR",
+                        "autoscaling:EC2_INSTANCE_TERMINATE",
+                        "autoscaling:EC2_INSTANCE_TERMINATE_ERROR",
+                        "autoscaling:TEST_NOTIFICATION"
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        },
+                        "PropagateAtLaunch": "true"
+                    }
+                ]
+            }
+        }
+    }
+}
