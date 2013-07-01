@@ -49,8 +49,8 @@ an Auto Scaling notification topic ARN is assembled from a therefore required AW
             "Description": "New Relic account license key.",
             "Type": "String"
         },
-        "RemoteAccessCidrIp": {
-            "Description": "CIDR range to allow remote access from (default: localhost, i.e. none).",
+        "RemoteAccessCidrRange": {
+            "Description": "CIDR IP address range to allow remote access from (default: localhost, i.e. none).",
             "Type": "String",
             "Default": "127.0.0.1/32"
         },
