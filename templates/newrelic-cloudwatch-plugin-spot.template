@@ -37,7 +37,11 @@
         "RemoteAccessCidrRange": {
             "Description": "CIDR IP address range to allow remote access from (default: localhost, i.e. none).",
             "Type": "String",
-            "Default": "127.0.0.1/32"
+            "Default": "127.0.0.1/32",
+            "MinLength": "9",
+            "MaxLength": "18",
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+            "ConstraintDescription": "must be a valid CIDR IP address range of the form x.x.x.x/x."
         },
         "SpotPrice": {
             "Type": "Number",
